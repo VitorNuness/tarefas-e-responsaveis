@@ -51,12 +51,6 @@ class Responsavel
 
     public void AdicionarTarefa(Tarefa tarefa)
     {
-        if (tarefas.Count() < 3)
-        {
-            tarefas.Add(tarefa);
-            return;
-        }
-        System.Console.WriteLine($"Não foi possível adicionar a tarefa para o funcionário {nome}, pois aua lista está cheia.");
-        return;
+        tarefas.Add(tarefa);
     }
 }
