@@ -110,6 +110,15 @@ class Gerenciador
 
     public void AtualizarTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaResponsaveis)
     {
+        Console.Clear();
+
+        if (listaTarefas.Count() <= 0)
+        {
+            Console.WriteLine("Não há tarefas para serem atualizadas.\nPressione qualquer tecla.");
+            Console.ReadKey();
+            return;
+        }
+
         Console.WriteLine("Selecione a tarefa para ser atualizada ou aperte Enter para voltar:");
         foreach (Tarefa tar in listaTarefas)
         {
@@ -181,6 +190,52 @@ class Gerenciador
         }
 
         Console.WriteLine("Tarefa atualizada com sucesso.");
+    }
+
+    public void AtualizarStatus(List<Tarefa> listaTarefas, List<Responsavel> listaResponsaveis)
+    {
+        Console.Clear();
+        if (listaTarefas.Count() <= 0)
+        {
+            Console.WriteLine("Não há tarefas para serem atualizadas.\nPressione qualquer tecla.");
+            Console.ReadKey();
+            return;
+        }
+
+        Console.WriteLine("Selecione a tarefa para ser atualizada ou aperte Enter para voltar:");
+        foreach (Tarefa tar in listaTarefas)
+        {
+            if (tar.Status != EStatus.FINALIZADO)
+            {
+                Console.WriteLine($"{tar.Id} - Título: {tar.Titulo} Responsável: {tar.Responsavel.id} - {tar.Responsavel.nome}");
+            }
+        }
+        Console.WriteLine("Digite o código da tarefa:");
+        string tarefaId = Console.ReadLine();
+
+        if (tarefaId == "")
+        {
+            return;
+        }
+
+        Tarefa tarefa = listaTarefas.FirstOrDefault(t => t.Id == int.Parse(tarefaId));
+
+        Console.WriteLine($"Tarefa selecionada: {tarefa.Titulo}");
+
+        if (tarefa.Status == EStatus.FINALIZADO)
+        {
+            Console.WriteLine("Está tarefa já está finalizada!");
+        }
+
+        EStatus antigoStatus = tarefa.Status;
+        tarefa.Status = (EStatus)(int)tarefa.Status + 1;
+
+        Responsavel responsavel = listaResponsaveis.FirstOrDefault(r => r == tarefa.Responsavel);
+        Tarefa tarefaResponsavel = responsavel.tarefas.FirstOrDefault(tr => tr == tarefa);
+        tarefaResponsavel = tarefa;
+
+        Console.WriteLine($"Status atualizado de {antigoStatus} para {tarefa.Status}.");
+
     }
 
     public void ListarTarefas(List<Tarefa> listaTarefas, List<Responsavel> listaResponsaveis)

@@ -33,10 +33,10 @@ do
             tarefaCSV.EscreverDados(listaTarefas);
             break;
         case 5:
-            System.Console.WriteLine(menu.opcao);
+            gerenciador.AtualizarStatus(listaTarefas, listaResponsaveis);
+            tarefaCSV.EscreverDados(listaTarefas);
             break;
         case 6:
-            System.Console.WriteLine(menu.opcao);
             do {
                 menuListar.Mostrar();
                 switch (menuListar.opcao)
@@ -54,9 +54,11 @@ do
             } while(menuListar.opcao != 0);
             break;
         case 7:
-            System.Console.WriteLine(menu.opcao);
+            responsavelCSV.LerDados(listaResponsaveis);
+            tarefaCSV.LerDados(listaTarefas, listaResponsaveis);
             break;
         case 0:
+            Console.Clear();
             System.Console.WriteLine("Até mais.");
             break;
     }
