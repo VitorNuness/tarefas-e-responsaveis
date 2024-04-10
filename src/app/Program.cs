@@ -105,32 +105,26 @@ static void AtualizarTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaRe
 
     Console.WriteLine("Novo título da tarefa:");
     string novoTitulo = Console.ReadLine();
-    if (!string.IsNullOrEmpty(novoTitulo))
+    if (novoTitulo != "")
     {
         tarefa.Titulo = novoTitulo;
     }
 
     Console.WriteLine("Nova data limite (ano/mês/dia ex:2024/01/01):");
     string novaDataLimiteStr = Console.ReadLine();
-    if (!string.IsNullOrEmpty(novaDataLimiteStr))
+    if (novaDataLimiteStr != "")
     {
-        if (DateTime.TryParse(novaDataLimiteStr, out DateTime novaDataLimite))
-        {
-            tarefa.DataLimite = novaDataLimite;
-        }
-        else
-        {
-            Console.WriteLine("Data inserida inválida. A data não será atualizada.");
-        }
+        tarefa.DataLimite = DateTime.Parse(novaDataLimiteStr);
+        
     }
 
     Console.WriteLine("Nova prioridade (1 - BAIXA, 2 - MÉDIA, 3 - ALTA):");
     string novaPrioridadeStr = Console.ReadLine();
-    if (!string.IsNullOrEmpty(novaPrioridadeStr) && int.TryParse(novaPrioridadeStr, out int novaPrioridadeInt))
+    if (novaPrioridadeStr != "")
     {
-        if (Enum.IsDefined(typeof(EPrioridade), novaPrioridadeInt))
+        if (Enum.IsDefined(typeof(EPrioridade), int.Parse(novaPrioridadeStr)))
         {
-            tarefa.Prioridade = (EPrioridade)(novaPrioridadeInt);
+            tarefa.Prioridade = (EPrioridade)int.Parse(novaPrioridadeStr);
         }
         else
         {
@@ -145,7 +139,7 @@ static void AtualizarTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaRe
     }
     Console.WriteLine("Digite o código do novo responsável:");
     string novoResponsavelId = Console.ReadLine();
-    if (!string.IsNullOrEmpty(novoResponsavelId))
+    if (novoResponsavelId != "")
     {
         Responsavel novoResponsavel = listaResponsaveis.FirstOrDefault(r => r.id == int.Parse(novoResponsavelId));
         if (novoResponsavel != null)
