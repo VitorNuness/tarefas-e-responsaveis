@@ -6,8 +6,8 @@ ResponsavelCSV responsavelCSV = new ResponsavelCSV();
 List<Responsavel> listaResponsaveis = new List<Responsavel>();
 List<Tarefa> listaTarefas = new List<Tarefa>();
 
-tarefaCSV.LerDados(listaTarefas, listaResponsaveis);
 responsavelCSV.LerDados(listaResponsaveis);
+tarefaCSV.LerDados(listaTarefas, listaResponsaveis);
 
 void CadastrarResponsavel(List<Responsavel> listaResponsaveis)
 {
@@ -167,6 +167,87 @@ static void AtualizarTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaRe
     Console.WriteLine("Tarefa atualizada com sucesso.");
 }
 
+void ListarTarefas(List<Tarefa> listaTarefas)
+{
+    Console.Clear();
+    if (listaTarefas.Count() > 0)
+    {
+        foreach (Tarefa tarefa in listaTarefas)
+        {
+            Console.WriteLine($"{tarefa.Id} - {tarefa.Titulo} {DateOnly.FromDateTime(tarefa.DataLimite)} {tarefa.Status} {tarefa.Prioridade} {tarefa.Responsavel.nome}");
+        }
+    } else
+    {
+        Console.WriteLine("Não há tarefas cadastradas!");
+    }
+    Console.WriteLine("\nAperte qualquer tecla para voltar ao menu.");
+    Console.ReadKey();
+}
+
+void ListarTarefasPendentes(List<Tarefa> listaTarefas)
+{
+    Console.Clear();
+    List<Tarefa> listaTarefasPendentes = new List<Tarefa>();
+    if (listaTarefas.Count() > 0)
+    {
+        foreach (Tarefa tarefa in listaTarefas)
+        {
+            if (tarefa.Status == EStatus.PENDENTE)
+            {
+                listaTarefasPendentes.Add(tarefa);
+                if (listaTarefasPendentes.Count() > 0)
+                {
+                    foreach (Tarefa tarefaPendente in listaTarefasPendentes)
+                    {
+                        Console.WriteLine($"{tarefaPendente.Id} - {tarefaPendente.Titulo} {DateOnly.FromDateTime(tarefaPendente.DataLimite)} {tarefaPendente.Status} {tarefaPendente.Prioridade} {tarefaPendente.Responsavel.nome}");
+                    }
+                }
+            }
+        }
+    } else
+    {
+        Console.WriteLine("Não há tarefas cadastradas!");
+    }
+    if (listaTarefasPendentes.Count() == 0)
+    {
+        Console.WriteLine("Não há tarefas pendentes!");
+    }
+    Console.WriteLine("\nAperte qualquer tecla para voltar ao menu.");
+    Console.ReadKey();
+}
+
+void ListarTarefasFinalizadas(List<Tarefa> listaTarefas)
+{
+    Console.Clear();
+    List<Tarefa> listaTarefasFinalizadas = new List<Tarefa>();
+    if (listaTarefas.Count() > 0)
+    {
+        foreach (Tarefa tarefa in listaTarefas)
+        {
+            if (tarefa.Status == EStatus.FINALIZADO)
+            {
+                listaTarefasFinalizadas.Add(tarefa);
+                if (listaTarefasFinalizadas.Count() > 0)
+                {
+                    foreach (Tarefa tarefaFinalizada in listaTarefasFinalizadas)
+                    {
+                        Console.WriteLine($"{tarefaFinalizada.Id} - {tarefaFinalizada.Titulo} {DateOnly.FromDateTime(tarefaFinalizada.DataLimite)} {tarefaFinalizada.Status} {tarefaFinalizada.Prioridade} {tarefaFinalizada.Responsavel.nome}");
+                    }
+                }
+            }
+        }
+    } else
+    {
+        Console.WriteLine("Não há tarefas cadastradas!");
+    }
+    if (listaTarefasFinalizadas.Count() == 0)
+    {
+        Console.WriteLine("Não há tarefas finalizadas!");
+    }
+    Console.WriteLine("\nAperte qualquer tecla para voltar ao menu.");
+    Console.ReadKey();
+}
+
 
 do 
 {
@@ -200,13 +281,13 @@ do
                 switch (menuListar.opcao)
                 {
                     case 1:
-                        System.Console.WriteLine(menuListar.opcao);
+                        ListarTarefas(listaTarefas);
                         break;
                     case 2:
-                        System.Console.WriteLine(menuListar.opcao);
+                        ListarTarefasPendentes(listaTarefas);
                         break;
                     case 3:
-                        System.Console.WriteLine(menuListar.opcao);
+                        ListarTarefasFinalizadas(listaTarefas);
                         break;
                 }
             } while(menuListar.opcao != 0);

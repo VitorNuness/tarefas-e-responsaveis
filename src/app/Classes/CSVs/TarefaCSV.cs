@@ -36,12 +36,8 @@ class TarefaCSV : CSV
                 DateTime dataLimite = DateTime.Parse(valores[2]);
                 EStatus status = (EStatus)Convert.ToInt32(valores[3]);
                 EPrioridade prioridade = (EPrioridade)Convert.ToInt32(valores[4]);
-                Responsavel responsavel = responsaveis.Find(
-                    delegate(Responsavel resp)
-                    {
-                        return resp.id == Convert.ToInt32(valores[5]); 
-                    }
-                );
+                int responsavelId = Convert.ToInt32(valores[5]);
+                Responsavel responsavel = responsaveis.FirstOrDefault(r => r.id == responsavelId);
                 Tarefa tarefa = new Tarefa(id, titulo, dataLimite, status, prioridade, responsavel);
                 lista.Add(tarefa);
             }
