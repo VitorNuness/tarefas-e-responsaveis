@@ -1,15 +1,23 @@
 class Responsavel
 {
-    public Responsavel(string nome, string email)
+    public Responsavel(int id, string nome, string email)
     {
         Responsavel.ValidaNome(nome);
         Responsavel.ValidaEmail(email);
 
+        this._id = id;
         this._nome = nome;
         this._email = email;
     }
 
     List<Tarefa> tarefas = new List<Tarefa>();
+
+    private int _id;
+    public int id
+    {
+        get => _id;
+        set => _id = value;
+    }
 
     private string _nome;
     public string nome

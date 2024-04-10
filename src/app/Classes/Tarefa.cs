@@ -1,5 +1,22 @@
 class Tarefa
 {
+    public Tarefa(int id, string titulo, DateTime dataLimite, EStatus status, EPrioridade prioridade, Responsavel responsavel)
+    {
+        this._id = id;
+        this._titulo = titulo;
+        this._dataLimite = dataLimite;
+        this._status = status;
+        this._prioridade = prioridade;
+        this._responsavel = responsavel;
+    }
+
+    private int _id;
+    public int Id
+    {
+        get => _id;
+        set => _id = value;
+    }
+
     private string _titulo;
     public string Titulo
     {
