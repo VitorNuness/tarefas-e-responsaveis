@@ -10,7 +10,7 @@ class Responsavel
         this._email = email;
     }
 
-    List<Tarefa> tarefas = new List<Tarefa>();
+    public List<Tarefa> tarefas = new List<Tarefa>();
 
     private int _id;
     public int id

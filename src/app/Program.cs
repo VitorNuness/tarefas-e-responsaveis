@@ -81,9 +81,21 @@ void ExcluirTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaResponsavei
         Console.WriteLine("Tarefa não encontrada.");
         return;
     }
+
+    foreach (Responsavel responsavel in listaResponsaveis)
+    {
+        Tarefa tarefaDoResponsavel = responsavel.tarefas.FirstOrDefault(t => t.Id == tarefaId);
+        if (tarefaDoResponsavel != null)
+        {
+            responsavel.tarefas.Remove(tarefaDoResponsavel);
+            break;
+        }
+    }
+
     listaTarefas.Remove(tarefa);
     Console.WriteLine("Tarefa excluída com sucesso.");
 }
+
 
 static void AtualizarTarefa(List<Tarefa> listaTarefas, List<Responsavel> listaResponsaveis)
 {
