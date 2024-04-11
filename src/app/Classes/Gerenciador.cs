@@ -43,8 +43,21 @@ class Gerenciador
         Console.WriteLine("2 - MÉDIA");
         Console.WriteLine("3 - ALTA");
         EPrioridade prioridade = (EPrioridade)Convert.ToInt32(Console.ReadLine());
-        Console.WriteLine("Data limite (ano/mês/dia ex:2024/01/01): ");
-        DateTime dataLimite = DateTime.Parse(Console.ReadLine());
+
+        DateTime data;
+        int dataDif = 0;
+        do {
+            Console.WriteLine("Data limite (ano/mês/dia ex:2024/01/01): ");
+            data = DateTime.Parse(Console.ReadLine());
+            dataDif = (int)data.Subtract(DateTime.Today).TotalDays;
+            if (dataDif > 7 && prioridade == EPrioridade.ALTA)
+            {
+                Console.WriteLine("Uma tarefa de alta prioridade não pode ser realizada em menos de 7 dias.");
+            }
+        } while(dataDif > 7 && prioridade == EPrioridade.ALTA);
+
+        DateTime dataLimite = data;
+
         Console.WriteLine("Selecione o responsável para a tarefa:");
         foreach (Responsavel resp in listaResponsaveis)
         {
@@ -207,7 +220,7 @@ class Gerenciador
         {
             if (tar.Status != EStatus.FINALIZADO)
             {
-                Console.WriteLine($"{tar.Id} - Título: {tar.Titulo} Responsável: {tar.Responsavel.id} - {tar.Responsavel.nome}");
+                Console.WriteLine($"{tar.Id} - Título: {tar.Titulo} {tar.Status} Responsável: {tar.Responsavel.id} - {tar.Responsavel.nome}");
             }
         }
         Console.WriteLine("Digite o código da tarefa:");
@@ -226,11 +239,27 @@ class Gerenciador
         {
             Console.WriteLine("Está tarefa já está finalizada!");
         }
+        
+        Responsavel responsavel = listaResponsaveis.FirstOrDefault(r => r == tarefa.Responsavel);
+        int tarefasResponsavelEmAndamento = 0;
+
+        foreach (Tarefa tar in responsavel.tarefas)
+        {
+            if (tar.Status == EStatus.ANDAMENTO)
+            {
+                tarefasResponsavelEmAndamento++;
+            }
+        }
+
+        if (tarefasResponsavelEmAndamento == 3)
+        {
+            Console.WriteLine("O responsável já possui 3 tarefas em andamento.");
+            return;
+        }
 
         EStatus antigoStatus = tarefa.Status;
         tarefa.Status = (EStatus)(int)tarefa.Status + 1;
 
-        Responsavel responsavel = listaResponsaveis.FirstOrDefault(r => r == tarefa.Responsavel);
         Tarefa tarefaResponsavel = responsavel.tarefas.FirstOrDefault(tr => tr == tarefa);
         tarefaResponsavel = tarefa;
 
@@ -252,24 +281,39 @@ class Gerenciador
             Console.WriteLine("Digite o código do responsável:");
             string responsavelId = Console.ReadLine();
 
+            Console.WriteLine("Deseja ordenar por (P)rioridade ou (D)ata? (P/D)");
+            string ordenacao = Console.ReadLine().ToUpper();
+
+            IEnumerable<Tarefa> tarefasFiltradas = listaTarefas;
+
             if (responsavelId == "")
             {
-                foreach (Tarefa tarefa in listaTarefas)
-                {
-                    Console.WriteLine($"{tarefa.Id} - {tarefa.Titulo} {DateOnly.FromDateTime(tarefa.DataLimite)} {tarefa.Status} {tarefa.Prioridade} {tarefa.Responsavel.nome}");
-                }
-            }else
+                tarefasFiltradas = listaTarefas;
+            }
+            else
             {
-                foreach (Tarefa tarefa in listaTarefas)
-                {
-                    if (tarefa.Responsavel.id == int.Parse(responsavelId))
-                    {
-                        Console.WriteLine($"{tarefa.Id} - {tarefa.Titulo} {DateOnly.FromDateTime(tarefa.DataLimite)} {tarefa.Status} {tarefa.Prioridade} {tarefa.Responsavel.nome}");
-                    }
-                }
+                tarefasFiltradas = listaTarefas.Where(t => t.Responsavel.id == int.Parse(responsavelId));
             }
 
-        } else
+            switch (ordenacao)
+            {
+                case "P":
+                    tarefasFiltradas = tarefasFiltradas.OrderBy(t => t.Prioridade);
+                    break;
+                case "D":
+                    tarefasFiltradas = tarefasFiltradas.OrderBy(t => t.DataLimite);
+                    break;
+                default:
+                    Console.WriteLine("Opção inválida. Listando sem ordenação.");
+                    break;
+            }
+
+            foreach (Tarefa tarefa in tarefasFiltradas)
+            {
+                Console.WriteLine($"{tarefa.Id} - {tarefa.Titulo} {DateOnly.FromDateTime(tarefa.DataLimite)} {tarefa.Status} {tarefa.Prioridade} {tarefa.Responsavel.nome}");
+            }
+        }
+        else
         {
             Console.WriteLine("Não há tarefas cadastradas!");
         }
@@ -294,45 +338,46 @@ class Gerenciador
 
             if (responsavelId == "")
             {
-                foreach (Tarefa tarefa in listaTarefas)
-                {
-                    if (tarefa.Status == EStatus.PENDENTE)
-                    {
-                        listaTarefasPendentes.Add(tarefa);
-                        if (listaTarefasPendentes.Count() > 0)
-                        {
-                            foreach (Tarefa tarefaPendente in listaTarefasPendentes)
-                            {
-                                Console.WriteLine($"{tarefaPendente.Id} - {tarefaPendente.Titulo} {DateOnly.FromDateTime(tarefaPendente.DataLimite)} {tarefaPendente.Status} {tarefaPendente.Prioridade} {tarefaPendente.Responsavel.nome}");
-                            }
-                        }
-                    }
-                }
-            } else
+                listaTarefasPendentes = listaTarefas.Where(t => t.Status == EStatus.PENDENTE).ToList();
+            }
+            else
             {
-                foreach (Tarefa tarefa in listaTarefas)
+                listaTarefasPendentes = listaTarefas.Where(t => t.Status == EStatus.PENDENTE && t.Responsavel.id == int.Parse(responsavelId)).ToList();
+            }
+
+            if (listaTarefasPendentes.Count > 0)
+            {
+                Console.WriteLine("Deseja ordenar por (P)rioridade ou (D)ata? (P/D)");
+                string ordenacao = Console.ReadLine().ToUpper();
+
+                switch (ordenacao)
                 {
-                    if (tarefa.Status == EStatus.PENDENTE && tarefa.Responsavel.id == int.Parse(responsavelId))
-                    {
-                        listaTarefasPendentes.Add(tarefa);
-                        if (listaTarefasPendentes.Count() > 0)
-                        {
-                            foreach (Tarefa tarefaPendente in listaTarefasPendentes)
-                            {
-                                Console.WriteLine($"{tarefaPendente.Id} - {tarefaPendente.Titulo} {DateOnly.FromDateTime(tarefaPendente.DataLimite)} {tarefaPendente.Status} {tarefaPendente.Prioridade} {tarefaPendente.Responsavel.nome}");
-                            }
-                        }
-                    }
+                    case "P":
+                        listaTarefasPendentes = listaTarefasPendentes.OrderBy(t => t.Prioridade).ToList();
+                        break;
+                    case "D":
+                        listaTarefasPendentes = listaTarefasPendentes.OrderBy(t => t.DataLimite).ToList();
+                        break;
+                    default:
+                        Console.WriteLine("Opção inválida. Listando sem ordenação.");
+                        break;
+                }
+
+                foreach (Tarefa tarefaPendente in listaTarefasPendentes)
+                {
+                    Console.WriteLine($"{tarefaPendente.Id} - {tarefaPendente.Titulo} {DateOnly.FromDateTime(tarefaPendente.DataLimite)} {tarefaPendente.Status} {tarefaPendente.Prioridade} {tarefaPendente.Responsavel.nome}");
                 }
             }
-        } else
+            else
+            {
+                Console.WriteLine("Não há tarefas pendentes!");
+            }
+        }
+        else
         {
             Console.WriteLine("Não há tarefas cadastradas!");
         }
-        if (listaTarefasPendentes.Count() == 0)
-        {
-            Console.WriteLine("Não há tarefas pendentes!");
-        }
+
         Console.WriteLine("\nAperte qualquer tecla para voltar ao menu.");
         Console.ReadKey();
     }
@@ -353,48 +398,714 @@ class Gerenciador
 
             if (responsavelId == "")
             {
-                foreach (Tarefa tarefa in listaTarefas)
-                {
-                    if (tarefa.Status == EStatus.FINALIZADO)
-                    {
-                        listaTarefasFinalizadas.Add(tarefa);
-                        if (listaTarefasFinalizadas.Count() > 0)
-                        {
-                            foreach (Tarefa tarefaFinalizada in listaTarefasFinalizadas)
-                            {
-                                Console.WriteLine($"{tarefaFinalizada.Id} - {tarefaFinalizada.Titulo} {DateOnly.FromDateTime(tarefaFinalizada.DataLimite)} {tarefaFinalizada.Status} {tarefaFinalizada.Prioridade} {tarefaFinalizada.Responsavel.nome}");
-                            }
-                        }
-                    }
-                }
-            }else
+                listaTarefasFinalizadas = listaTarefas.Where(t => t.Status == EStatus.FINALIZADO).ToList();
+            }
+            else
             {
-                foreach (Tarefa tarefa in listaTarefas)
-                {
-                    if (tarefa.Status == EStatus.FINALIZADO && tarefa.Responsavel.id == int.Parse(responsavelId))
-                    {
-                        listaTarefasFinalizadas.Add(tarefa);
-                        if (listaTarefasFinalizadas.Count() > 0)
-                        {
-                            foreach (Tarefa tarefaFinalizada in listaTarefasFinalizadas)
-                            {
-                                Console.WriteLine($"{tarefaFinalizada.Id} - {tarefaFinalizada.Titulo} {DateOnly.FromDateTime(tarefaFinalizada.DataLimite)} {tarefaFinalizada.Status} {tarefaFinalizada.Prioridade} {tarefaFinalizada.Responsavel.nome}");
-                            }
-                        }
-                    }
-                }
+                listaTarefasFinalizadas = listaTarefas.Where(t => t.Status == EStatus.FINALIZADO && t.Responsavel.id == int.Parse(responsavelId)).ToList();
             }
 
-        } else
+            if (listaTarefasFinalizadas.Count > 0)
+            {
+                Console.WriteLine("Deseja ordenar por (P)rioridade ou (D)ata? (P/D)");
+                string ordenacao = Console.ReadLine().ToUpper();
+
+                switch (ordenacao)
+                {
+                    case "P":
+                        listaTarefasFinalizadas = listaTarefasFinalizadas.OrderBy(t => t.Prioridade).ToList();
+                        break;
+                    case "D":
+                        listaTarefasFinalizadas = listaTarefasFinalizadas.OrderBy(t => t.DataLimite).ToList();
+                        break;
+                    default:
+                        Console.WriteLine("Opção inválida. Listando sem ordenação.");
+                        break;
+                }
+
+                foreach (Tarefa tarefaFinalizada in listaTarefasFinalizadas)
+                {
+                    Console.WriteLine($"{tarefaFinalizada.Id} - {tarefaFinalizada.Titulo} {DateOnly.FromDateTime(tarefaFinalizada.DataLimite)} {tarefaFinalizada.Status} {tarefaFinalizada.Prioridade} {tarefaFinalizada.Responsavel.nome}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Não há tarefas finalizadas!");
+            }
+        }
+        else
         {
             Console.WriteLine("Não há tarefas cadastradas!");
         }
-        if (listaTarefasFinalizadas.Count() == 0)
-        {
-            Console.WriteLine("Não há tarefas finalizadas!");
-        }
+
         Console.WriteLine("\nAperte qualquer tecla para voltar ao menu.");
         Console.ReadKey();
     }
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Hello world XD

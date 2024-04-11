@@ -9,7 +9,6 @@ class Responsavel
         this._nome = nome;
         this._email = email;
     }
-
     public List<Tarefa> tarefas = new List<Tarefa>();
 
     private int _id;

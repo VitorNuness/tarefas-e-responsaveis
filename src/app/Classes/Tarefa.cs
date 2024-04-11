@@ -62,7 +62,7 @@ class Tarefa
 
     private void ValidaData(DateTime data)
     {
-        int diferencaDeDatas = DateTime.Compare(data, DateTime.Today);
+        int diferencaDeDatas = (int)data.Subtract(DateTime.Today).TotalDays;
         if (_prioridade == EPrioridade.ALTA && diferencaDeDatas > 7)
         {
             throw new Exception("Uma tarefa de prioridade alta, deve ser concluída em menos de uma semana (7 dias).");
